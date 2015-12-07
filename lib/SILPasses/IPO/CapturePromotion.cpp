@@ -257,7 +257,7 @@ void ReachabilityInfo::compute() {
       if (!Changed) {
         // If we have not detected a change yet, then calculate new
         // reachabilities into a new bit vector so we can determine if any
-        // change has occured.
+        // change has occurred.
         NewSet = CurSet;
         for (auto PI = BB.pred_begin(), PE = BB.pred_end(); PI != PE; ++PI) {
           unsigned PredID = BlockMap[*PI];
@@ -452,13 +452,11 @@ ClosureCloner::initCloned(SILFunction *Orig, StringRef ClonedName,
          && "SILFunction missing DebugScope");
   assert(!Orig->isGlobalInit() && "Global initializer cannot be cloned");
 
-  auto Fn =
-      SILFunction::create(M, Orig->getLinkage(), ClonedName, SubstTy,
-                          Orig->getContextGenericParams(), Orig->getLocation(),
-                          Orig->isBare(), IsNotTransparent, Orig->isFragile(),
-                          Orig->isThunk(),
-                          Orig->getClassVisibility(), Orig->getInlineStrategy(),
-                          Orig->getEffectsKind(), Orig, Orig->getDebugScope());
+  auto *Fn = M.getOrCreateFunction(
+      Orig->getLinkage(), ClonedName, SubstTy, Orig->getContextGenericParams(),
+      Orig->getLocation(), Orig->isBare(), IsNotTransparent, Orig->isFragile(),
+      Orig->isThunk(), Orig->getClassVisibility(), Orig->getInlineStrategy(),
+      Orig->getEffectsKind(), Orig, Orig->getDebugScope());
   Fn->setSemanticsAttr(Orig->getSemanticsAttr());
   Fn->setDeclCtx(Orig->getDeclContext());
   return Fn;
