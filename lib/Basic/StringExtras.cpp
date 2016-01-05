@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2014 - 2015 Apple Inc. and the Swift project authors
+// Copyright (c) 2014 - 2016 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See http://swift.org/LICENSE.txt for license information
@@ -26,6 +26,13 @@
 
 using namespace swift;
 using namespace camel_case;
+
+bool swift::canBeArgumentLabel(StringRef identifier) {
+  if (identifier == "var" || identifier == "let" || identifier == "inout")
+    return false;
+
+  return true;
+}
 
 PrepositionKind swift::getPrepositionKind(StringRef word) {
 #define DIRECTIONAL_PREPOSITION(Word)           \
@@ -723,12 +730,19 @@ static StringRef toLowercaseWordAndAcronym(StringRef string,
   if (!clang::isUppercase(string[0]))
     return string;
 
-  // Lowercase until we hit the end there is an uppercase letter
-  // followed by a non-uppercase letter.
+  // Lowercase until we hit the an uppercase letter followed by a
+  // non-uppercase letter.
   llvm::SmallString<32> scratchStr;
   for (unsigned i = 0, n = string.size(); i != n; ++i) {
     // If the next character is not uppercase, stop.
     if (i < n - 1 && !clang::isUppercase(string[i+1])) {
+      // If the next non-uppercase character was alphanumeric, we should
+      // still lowercase the character we're on.
+      if (!clang::isLetter(string[i+1])) {
+        scratchStr.push_back(clang::toLowercase(string[i]));
+        ++i;
+      }
+
       scratchStr.append(string.substr(i));
       break;
     }

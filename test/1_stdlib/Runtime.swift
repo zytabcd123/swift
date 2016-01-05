@@ -17,10 +17,10 @@ import MirrorObjC
 var nsObjectCanaryCount = 0
 @objc class NSObjectCanary : NSObject {
   override init() {
-    ++nsObjectCanaryCount
+    nsObjectCanaryCount += 1
   }
   deinit {
-    --nsObjectCanaryCount
+    nsObjectCanaryCount -= 1
   }
 }
 
@@ -31,10 +31,10 @@ struct NSObjectCanaryStruct {
 var swiftObjectCanaryCount = 0
 class SwiftObjectCanary {
   init() {
-    ++swiftObjectCanaryCount
+    swiftObjectCanaryCount += 1
   }
   deinit {
-    --swiftObjectCanaryCount
+    swiftObjectCanaryCount -= 1
   }
 }
 
@@ -238,11 +238,11 @@ Runtime.test("_isClassOrObjCExistential") {
   expectFalse(_isClassOrObjCExistential(SwiftObjectCanaryStruct.self))
   expectFalse(_isClassOrObjCExistential_Opaque(SwiftObjectCanaryStruct.self))
 
-  typealias SwiftClosure = ()->()
+  typealias SwiftClosure = () -> ()
   expectFalse(_isClassOrObjCExistential(SwiftClosure.self))
   expectFalse(_isClassOrObjCExistential_Opaque(SwiftClosure.self))
 
-  typealias ObjCClosure = @convention(block) ()->()
+  typealias ObjCClosure = @convention(block) () -> ()
   expectTrue(_isClassOrObjCExistential(ObjCClosure.self))
   expectTrue(_isClassOrObjCExistential_Opaque(ObjCClosure.self))
 
@@ -272,10 +272,10 @@ Runtime.test("_canBeClass") {
   expectEqual(1, _canBeClass(SwiftObjectCanary.self))
   expectEqual(0, _canBeClass(SwiftObjectCanaryStruct.self))
 
-  typealias SwiftClosure = ()->()
+  typealias SwiftClosure = () -> ()
   expectEqual(0, _canBeClass(SwiftClosure.self))
 
-  typealias ObjCClosure = @convention(block) ()->()
+  typealias ObjCClosure = @convention(block) () -> ()
   expectEqual(1, _canBeClass(ObjCClosure.self))
 
   expectEqual(1, _canBeClass(CFArray.self))
@@ -383,7 +383,7 @@ Runtime.test("isBridgedVerbatimToObjectiveC") {
   expectTrue(_isBridgedVerbatimToObjectiveC(BridgedVerbatimRefType))
 }
 
-//===---------------------------------------------------------------------===//
+//===----------------------------------------------------------------------===//
 
 // The protocol should be defined in the standard library, otherwise the cast
 // does not work.
@@ -409,7 +409,7 @@ struct Struct2ConformsToP1<T : BooleanType> : BooleanType, Q1 {
   var value: T
 }
 
-// A large struct that can not be stored inline in an opaque buffer.
+// A large struct that cannot be stored inline in an opaque buffer.
 struct Struct3ConformsToP2 : CustomStringConvertible, Q1 {
   var a: UInt64 = 10
   var b: UInt64 = 20
@@ -428,7 +428,7 @@ struct Struct3ConformsToP2 : CustomStringConvertible, Q1 {
   }
 }
 
-// A large struct that can not be stored inline in an opaque buffer.
+// A large struct that cannot be stored inline in an opaque buffer.
 struct Struct4ConformsToP2<T : CustomStringConvertible> : CustomStringConvertible, Q1 {
   var value: T
   var e: UInt64 = 50
@@ -909,14 +909,14 @@ RuntimeFoundationWrappers.test("_stdlib_NSObject_isEqual/NoLeak") {
 var nsStringCanaryCount = 0
 @objc class NSStringCanary : NSString {
   override init() {
-    ++nsStringCanaryCount
+    nsStringCanaryCount += 1
     super.init()
   }
   required init(coder: NSCoder) {
     fatalError("don't call this initializer")
   }
   deinit {
-    --nsStringCanaryCount
+    nsStringCanaryCount -= 1
   }
   @objc override var length: Int {
     return 0
@@ -2266,7 +2266,7 @@ func computeCountLeadingZeroes(x: Int64) -> Int64 {
   var r: Int64 = 64
   while x != 0 {
     x >>= 1
-    r--
+    r -= 1
   }
   return r
 }

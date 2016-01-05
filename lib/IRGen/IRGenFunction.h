@@ -1,8 +1,8 @@
-//===--- IRGenFunction.h - IR Generation for Swift Functions ---*- C++ -*-===//
+//===--- IRGenFunction.h - IR Generation for Swift Functions ----*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2014 - 2015 Apple Inc. and the Swift project authors
+// Copyright (c) 2014 - 2016 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See http://swift.org/LICENSE.txt for license information
@@ -261,6 +261,7 @@ public:
   //   - strong references
   void emitStrongRetain(llvm::Value *value, ReferenceCounting refcounting);
   void emitStrongRelease(llvm::Value *value, ReferenceCounting refcounting);
+  llvm::Value *emitLoadRefcountedPtr(Address addr, ReferenceCounting style);
 
   //   - unowned references
   void emitUnownedRetain(llvm::Value *value, ReferenceCounting style);
@@ -284,6 +285,10 @@ public:
   llvm::Value *emitUnownedTakeStrong(Address src, llvm::Type *resultType,
                                      ReferenceCounting style);
   void emitUnownedDestroy(Address addr, ReferenceCounting style);
+  llvm::Value *getUnownedExtraInhabitantIndex(Address src,
+                                              ReferenceCounting style);
+  void storeUnownedExtraInhabitant(llvm::Value *index, Address dest,
+                                   ReferenceCounting style);
 
   //   - weak references
   void emitWeakInit(llvm::Value *ref, Address dest, ReferenceCounting style);
@@ -322,6 +327,7 @@ public:
   llvm::Value *emitNativeUnownedLoadStrong(Address src, llvm::Type *resultType);
   llvm::Value *emitNativeUnownedTakeStrong(Address src, llvm::Type *resultType);
   void emitNativeUnownedDestroy(Address addr);
+
   //   - weak references
   void emitNativeWeakInit(llvm::Value *value, Address dest);
   void emitNativeWeakAssign(llvm::Value *value, Address dest);
@@ -351,10 +357,6 @@ public:
   void emitUnknownStrongRetain(llvm::Value *value);
   void emitUnknownStrongRelease(llvm::Value *value);
   //   - unowned references
-  void emitUnknownUnownedRetain(llvm::Value *value);
-  void emitUnknownUnownedRelease(llvm::Value *value);
-  void emitUnknownStrongRetainUnowned(llvm::Value *value);
-  void emitUnknownStrongRetainAndUnownedRelease(llvm::Value *value);
   void emitUnknownUnownedInit(llvm::Value *val, Address dest);
   void emitUnknownUnownedAssign(llvm::Value *value, Address dest);
   void emitUnknownUnownedCopyInit(Address destAddr, Address srcAddr);
@@ -383,9 +385,6 @@ public:
   void emitErrorStrongRetain(llvm::Value *value);
   void emitErrorStrongRelease(llvm::Value *value);
 
-  llvm::Value *emitLoadNativeRefcountedPtr(Address addr);
-  llvm::Value *emitLoadUnknownRefcountedPtr(Address addr);
-  llvm::Value *emitLoadBridgeRefcountedPtr(Address addr);
   llvm::Value *emitIsUniqueCall(llvm::Value *value, SourceLoc loc,
                                 bool isNonNull, bool checkPinned);
 
